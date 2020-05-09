@@ -1,0 +1,37 @@
+---
+title: "Q3"
+author: "Shubhang Periwal 19201104"
+date: "3/8/2020"
+output: pdf_document
+---
+
+```{r}
+library(rjags)
+x1=c(2, 2, 3, 5, 2, 5, 6, 4, 3, 1)
+misprints=list(x=x1, N=length(x1),a=24, b=12)
+mod=jags.model(file="misprints.model", data=misprints)
+smp=jags.samples(mod,"lambda",n.iter=1000) # theta here is the unknown date of the rock
+mp=data.frame()
+for (i in 1:1000) {
+mp=rbind(mp,rpois(16,lambda=smp$lambda[i]))  
+}
+result=data.frame("min"=apply(mp,1,min),"max"=apply(mp,1,max),
+                  "mean"=apply(mp,1,mean),"sd"=apply(mp,1,sd))
+x2=c(2, 2, 3, 5, 2, 5, 6, 4, 3, 1,3, 4, 2, 1, 2, 3)
+par(mfrow=c(2,2))
+g1=data.frame(table(result$min))
+g1[["col"]]=rep("blue",length(table(result$min)))
+g1[[which(g1$Var1==min(x2)),"col"]]="green"
+barplot(g1$Freq,names.arg = g1$Var1,col=g1$col)
+
+g1=data.frame(table(result$max))
+g1[["col"]]=rep("grey",length(table(result$max)))
+g1[[which(g1$Var1==max(x2)),"col"]]="red"
+barplot(g1$Freq,names.arg = g1$Var1,col=g1$col)
+
+plot(density(result$mean))
+abline(v=mean(x2),col="red")
+
+plot(density(result$sd))
+abline(v=sd(x2),col="red")
+```

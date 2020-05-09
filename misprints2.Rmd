@@ -1,0 +1,38 @@
+---
+title: "q2"
+author: "Shubhang Periwal 19201104"
+date: "3/8/2020"
+output: pdf_document
+---
+
+```{r}
+library(rjags)
+#a
+x1=c(2, 2, 3, 5, 2, 5, 6, 4, 3, 1)
+#Gammma(24, 12)
+alpha1= 24+sum(x1)
+beta1= 12+length(x1)
+curve(dgamma(x, shape=alpha1, rate=beta1),col=5,lwd=2,xlab="misprints",main="Comparing both Outputs"
+      ,ylim=c(0,1.5),xlim = c(0,6))
+#Gamma(9, 6)
+x2=c(3, 4, 2, 1, 2, 3)
+alpha2= 9+sum(x2,x1)
+beta2=6+length(x1)+length(x2)
+curve(dgamma(x, shape=alpha2, rate=beta2),add=T,col=2,lwd=3,lty=3) # prior
+legend("topright", c("Gamma(24,12)", "Gamma(9,6)"), lty=c(1,3), col=c(5,2), lwd=c(3,3,3,3))
+
+```
+
+
+
+```{r}
+misprints=list(x=x1, N=length(x1),a=24, b=12)
+jmodel=jags.model(file="misprints.model", data=misprints)
+samps=jags.samples(jmodel,"lambda",n.iter=1e6) 
+plot(density(samps$lambda),col=3,lty=4,lwd=2,xlab="misprints",main="",ylim=c(0,1.5))
+curve(dgamma(x, shape=24, rate=12),add=T,col=1,lwd=2,lty=1) # prior
+curve(dnorm(x,mean = mean(x1),sd=1/sqrt(mean(x1))),add=T,col=2,lwd=2,lty=1) # likelihood
+curve(dgamma(x,shape=alpha1, rate=beta1),add=T,col=4,lwd=2,lty=3) # theoretical posterior
+legend("topright", c("PRIOR", "LIKELIHOOD", "JAGS PREDICTION","THEORITCAL PREDICTION"),
+       lty=c(1,1,4,5), col=c(1,2,3,4), lwd=c(2,2,2,2))
+```

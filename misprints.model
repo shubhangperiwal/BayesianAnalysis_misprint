@@ -1,0 +1,7 @@
+model
+{
+    for (i in 1:N) {
+      x[i] ~ dpois(lambda)
+	}   
+   lambda ~ dgamma(a, b)
+}
